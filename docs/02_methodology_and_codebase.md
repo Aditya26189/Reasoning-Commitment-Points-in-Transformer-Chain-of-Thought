@@ -10,10 +10,19 @@ The `collect_pairs_v3` module is responsible for mining the mathematical state s
 - **Validation**: The terminal answer is extracted and compared to the dataset GT.
 - **State**: If valid, this trace is cached as the `Correct Trace`. If invalid, the problem is skipped (as we cannot establish a ground-truth baseline path).
 
-### Phase 2: Sampled Wrong Divergence
-- **Operation**: The model is prompted with $T=1.2$ to $T=2.0$ (high entropy sampling).
-- **Condition**: Generation continues in a loop (up to `greedy_budget`) until the terminal answer strictly *diverges* from the GT.
-- **State**: The first divergent trace is cached as the `Wrong Trace`.
+### Phase 2: Pre-Screening (Difficulty Filter)
+- **Operation**: Test the problem with 3 fast samples at `temperature=1.2`.
+- **Condition**: If all 3 samples return the correct answer, the problem is discarded as "too easy" (inefficient to mine wrong traces).
+
+### Phase 3: Escalating Wrong-Trace Sampling
+- **Operation**: Sample traces at temperatures `[1.4, 1.6, 1.8, 2.0]` (high entropy).
+- **Condition**: The first trace yielding a mathematically incorrect answer (properly formatted with `####` or `\boxed{}`) is cached as the `Wrong Trace`.
+
+### Phase 4: Injection Fallback (Unused in Final Run)
+- **Operation**: If sampling fails, fall back to string-manipulation injection (swapping final numbers inside the LaTeX boxing of a correct trace).
+- **State**: The final N=19 dataset used only organically sampled pairs — no injection fallbacks.
+
+**Final run note:** Pairs were loaded from a pre-collected Kaggle dataset (`pairs.json`, 20 loaded, 1 fake-wrong removed → 19 organic). See [07_final_methods_and_architecture_deep_dive.md](07_final_methods_and_architecture_deep_dive.md) §2.1 for the full pipeline.
 
 ## 2.2 Stage Segmentation Heuristics
 To evaluate commitment systematically, we cannot truncate at random indices. We utilize a regex-based heuristic engine (`get_stage_masks`) to classify every line of the trace into an architectural stage.

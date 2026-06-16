@@ -34,7 +34,7 @@ The per-layer patching scans (Blocks C and D), culminating in the Block D Transi
 If the true latent flip rate at late layers were 30%, the probability of observing exactly zero flips across 11 trials is $0.7^{11} \approx 2.0\%$. The hard zero at layers 44 and 47 (the only late layers tested) is statistically significant evidence of causal locking, not sampling noise.
 
 ### 4.2.2 The Dutta et al. Alignment
-We originally conceptualized this as a "monotonic decline," but the audit reframed this pattern as a **plateau followed by a cliff**. This shape maps directly onto the "functional rift" described in recent mechanistic interpretability literature (Dutta et al.).
+We originally conceptualized this as a "monotonic decline," but the audit reframed this pattern as a **plateau followed by a cliff**. This shape maps directly onto the "functional rift" described by Dutta et al. (*"How to think step-by-step: A mechanistic understanding of chain-of-thought reasoning"*, Llama-2 7B).
 
 - **The Plateau (Early/Mid Layers):** These layers transmit and assemble input-relevant semantic information. Patching here steers the sequence ~40% of the time.
 - **The Cliff (Late Layers):** These layers operate past the functional rift. Their job is to rigidly project the in-context prior into the terminal vocabulary distribution. Patching here fails because the model has already irrevocably committed.
