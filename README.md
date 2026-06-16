@@ -29,6 +29,8 @@ Executed in `final/notebooke66c37d069.ipynb` on **N=19 organic correct/wrong tra
 
 After excluding traces that self-corrected without patching ("already flipped"), **more than half** of genuinely committed-wrong trajectories can be causally redirected by injecting correct computational hidden states. The cross-problem control confirms this is predominantly **problem-specific semantic steering**, not generic attention disruption.
 
+Note: Blocks A and B used slightly different eligible pair sets (n=11 vs n=13) due to asymmetric mask clipping in the cross-problem code path. A paired analysis on the 10 shared traces yields 60.0% vs 20.0% (+40 pp directional gap; Fisher's exact p=0.21). See [docs/07](docs/07_final_methods_and_architecture_deep_dive.md) for full limitations.
+
 ## 🚀 Key Discovery: The Functional Rift
 
 Our most significant finding is the empirical mapping of a **"Functional Rift"** across the transformer stack via a sparse 18-layer sweep. By causally intervening on `computation` semantic tokens at each tested layer independently, we discovered a distinct tripartite architecture of commitment:
@@ -40,11 +42,11 @@ Our most significant finding is the empirical mapping of a **"Functional Rift"**
 1. **The Plateau (Layers 0–28): Semantic Steering**
    - Intervening on computational tokens in early/mid layers flips the terminal answer **36–45%** of the time (n=11 per layer). These layers act as an open scratchpad, assembling algebraic meaning that can redirect the trajectory.
 2. **The Transition Zone (Layers 30–35): The Collapse**
-   - We isolated the commitment drop to a precise window — flip rate falls from **27%** at layer 30 to **9%** at layer 35. The latent distribution is collapsing onto the terminal state.
+   - A tight **6-layer collapse window** — flip rate falls from **27%** at layer 30 to **9%** at layer 35. The latent distribution is collapsing onto the terminal state.
 3. **The Cliff (Layers 44, 47): Causal Locking**
    - Flip rate hits a hard **0%** (0/11 at layers 44 and 47, the only late layers tested). Even injecting correct mathematical reasoning into the residual stream cannot redirect the output. Late layers rigidly project the in-context prior into the original wrong answer.
 
-This confirms and extends the bipartite theory of transformer layer function (Dutta et al.) on a complex multi-step mathematical reasoning task.
+This confirms and extends the bipartite theory of transformer layer function described by Dutta et al. (*"How to think step-by-step: A mechanistic understanding of chain-of-thought reasoning"*, Llama-2 7B) on a complex multi-step mathematical reasoning task — with a distinct layer range on Qwen2.5-14B.
 
 ## 🔬 Methodology: Truncate & Generate
 
@@ -63,15 +65,31 @@ The final experimental suite (Blocks A–D) includes a **Cross-Problem Control**
 cot/
 ├── final/                       # ⭐ Canonical results — start here
 │   ├── notebooke66c37d069.ipynb  # Executed final notebook (Blocks A–D)
-│   ├── final_nb_img_40_1.png    # Per-layer commitment curve
+│   ├── notebook_final_pilot_cummulative.ipynb # Exploratory N=20 pilot (cumulative sweep)
+│   ├── final_nb_img_40_1.png    # Per-layer commitment curve (Block C+D)
+│   ├── final_nb_img_39_0.png    # Block A/B summary chart (from Kaggle export)
 │   ├── commitment_raw_decomposition.png
-│   └── results (1).zip          # Exported JSON results from Kaggle run
+│   └── results (1).zip          # Exported JSON + plots from Kaggle run (see below)
 ├── notebooks/
 │   ├── v1_prototype_gsm8k/      # Early GSM8K prototypes (superseded)
 │   ├── v2_math_development/     # MATH migration & T&G paradigm development
 │   └── v3_current/              # Late-stage iterations (superseded by final/)
 └── docs/                        # Comprehensive technical documentation
 ```
+
+**`results (1).zip` contents:**
+
+| File | Description |
+|------|-------------|
+| `results_main.json` | Block A: 6/11 flips, 7 already_flipped, 1 skip |
+| `results_cross.json` | Block B: 3/13 flips, 5 already_flipped, 1 skip |
+| `results_per_layer.json` | Block C + Canary (sparse 13-layer subset) |
+| `results_per_layer_full.json` | Merged C + Canary + D (all 18 measured layers) |
+| `per_layer_computation_only.png` | Sparse sweep plot |
+| `per_layer_pinned.png` | Transition pinning plot |
+| `__results___files/__results___39_3.png` | (= `final_nb_img_39_0.png` in repo) |
+| `__results___files/__results___40_3.png` | (= `final_nb_img_40_1.png` in repo) |
+| `__huggingface_repos__.json` | Model download metadata (Qwen2.5-14B-Instruct) |
 
 > **`final/` supersedes all notebook versions.** The `notebooks/` folders preserve the research iteration history.
 
