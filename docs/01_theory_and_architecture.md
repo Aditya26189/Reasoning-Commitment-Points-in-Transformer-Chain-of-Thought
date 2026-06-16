@@ -25,35 +25,29 @@ The MATH dataset (Level 4 and 5 problems) provides an ideal environment for prob
 ---
 
 ## 1.5 Activation Patching Architecture
-The core of this experiment relies on causal interventions via **Activation Patching**. Specifically, we utilize a macroscopic variant called "Truncate & Generate" to probe the bounds of sequence-level commitment.
+The core of this experiment relies on causal interventions via **Activation Patching**. Specifically, we utilize a macroscopic variant called "Truncate & Generate" to probe the bounds of sequence-level commitment without destroying token alignment on variable-length reasoning traces.
 
 ### The Causal Graph of Truncate & Generate
-To isolate the commitment point, we model the sequence generation as a deterministic causal graph. Let a trace be a sequence of tokens $T$. We identify two distinct traces for the identical mathematical prompt $P$:
-1. $T_{correct}$: A trace leading to the Ground Truth (GT) answer.
-2. $T_{wrong}$: A trace leading to an incorrect terminal state.
+To isolate the commitment point, we identify two distinct traces for the identical mathematical prompt $P$:
+1. $T_{correct}$: A trace organically leading to the Ground Truth (GT) answer.
+2. $T_{wrong}$: A trace organically leading to an incorrect terminal state.
 
-The Truncate & Generate methodology performs causal interventions on the sequence length itself. Instead of patching specific tensor dimensions inside the residual stream, we perform prefix-level replacement:
-- We slice the corrupted trace $T_{wrong}$ at a specific token index $k$, yielding the prefix $T_{wrong}[:k]$.
-- We inject $T_{wrong}[:k]$ into the context window.
-- We initiate a free-generation forward pass from $k$ to the terminal `<|im_end|>` token.
+Instead of patching specific tensor dimensions inside the residual stream across the entire fixed sequence, we perform surgical, dynamically aligned intervention:
+- We truncate the target trace $T_{wrong}$ at the boundary of a specific functional stage (e.g., after the `computation` step).
+- We initiate a free-generation forward pass from that boundary to the terminal `<|im_end|>` token.
+- Crucially, during this forward pass, we use PyTorch hooks to **surgically overwrite the hidden states** of the mathematical computation tokens in the residual stream. The new states are injected directly from the cached activations of the equivalent computation step in $T_{correct}$.
 
 ### The Objective Function
-The goal is to measure the **Flip Rate**: the probability that the generation originating from the corrupted prefix $T_{wrong}[:k]$ organically steers towards the terminal state of $T_{correct}$ (the GT answer). 
+The goal is to measure the **Flip Rate**: the probability that injecting correct computational hidden states causally redirects the generation of $T_{wrong}$ towards the terminal state of $T_{correct}$ (the GT answer).
 
-$$ \text{Flip Rate} = P(\text{terminal}( \text{generate}(T_{wrong}[:k]) ) == GT) $$
+$$ \text{Flip Rate} = P(\text{terminal}( \text{patch}(\text{generate}(T_{wrong})) ) == GT) $$
 
 ## 1.6 Disturbance Effects vs. Semantic Steering
-A critical architectural nuance of this method is the concept of "Disturbance." 
+A critical architectural nuance of this method is differentiating between semantic steering and arbitrary disruption.
 
-When we truncate a trace mid-generation and resume it, we are forcing the model to attend to a causal mask that it may not have perfectly predicted. While autoregressive models are robust to text continuation, mathematical reasoning involves highly brittle attention schemas. 
+When we forcefully overwrite hidden states in the residual stream, we risk introducing out-of-distribution (OOD) noise. If the flip rate changes, it might not be because the model "understood" the new math; the patching could simply break the local attention patterns, causing the model's trajectory to degrade unpredictably.
 
-If the model fails to flip to the correct answer, we hypothesize it is due to **Semantic Commitment**: the hidden states in $T_{wrong}[:k]$ already contain superposed representations of the incorrect final answer.
+To isolate true **Semantic Steering** (causal redirection based on mathematical meaning) from the **Disturbance Effect** (arbitrary attention disruption), we employ a cross-problem ablation. We patch activations from the correct trace of an entirely *different* math problem into $T_{wrong}$. The resulting "Specificity Gap" between same-problem and cross-problem flip rates mathematically isolates the problem-specific semantic content driving the behavioral shift.
 
-However, a competing hypothesis is the **Disturbance Effect**: the truncation boundary disrupts key induction heads or local attention patterns, causing the forward pass to degrade. If the forward pass degrades, it will inherently fail to reach the GT answer, mimicking true commitment.
-
-## 1.7 The Necessity of the Control Validation
-To differentiate between Semantic Commitment and the Disturbance Effect, we implement a Control Group architecture.
-- We slice the $T_{correct}$ trace at index $k$.
-- We generate freely from $T_{correct}[:k]$.
-
-If the Disturbance Effect is the dominant driver of failure, the Control Group should experience a severe drop in retention (i.e., it should forget how to solve the problem and output a wrong answer). If the Control Group maintains ~100% retention of the GT answer, it mathematically bounds the impact of the Disturbance Effect, allowing us to attribute failed flips in the Incorrect Group strictly to Semantic Commitment.
+## 1.7 Designed Extensibility: The Retention Control
+To further validate that the Truncate & Generate forward pass does not inherently degrade generation, a "Retention Control" (Block F) was designed. This involves slicing $T_{correct}$ and patching it with its own activations. If the generation maintains ~100% retention of the GT answer, it proves the patching mechanism is lossless. While this control remains a valuable future extension for reviewer preemption, it was not executed in the canonical final run, as the cross-problem baseline already adequately isolates the semantic steering signal.

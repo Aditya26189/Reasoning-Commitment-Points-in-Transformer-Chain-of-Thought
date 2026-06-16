@@ -1,6 +1,6 @@
 # 05. The Evolution of the CoT Commitment Experiment (20 Iterations)
 
-This document provides a chronological analysis of how the codebase and experimental methodology evolved across ~20 notebook iterations, from the early `notebookf786ef6636` series to the final `notebook_publishable.ipynb`.
+This document provides a chronological analysis of how the codebase and experimental methodology evolved across ~20 notebook iterations, from the early `notebookf786ef6636` series to the final `final/notebooke66c37d069.ipynb`.
 
 This narrative is explicitly designed to support the "challenges overcome" and methodology sections of the final academic paper.
 
@@ -57,13 +57,17 @@ This narrative is explicitly designed to support the "challenges overcome" and m
 - **Why it Changed:** In the NF4 artifact control experiment, we patch *wrong* acts into a *correct* trace. Outputting the Ground Truth (GT) means the model was robust, not that it "flipped". The old metric counted "stayed correct" as a "flip", inverting the axis.
 
 ### 10. The Ultimate Control Suite
-- **What Changed:** The final notebook expanded into a highly structured 6-block pipeline (Main, Cross-Problem, Per-Layer, NF4 check, Shuffled, Retention).
-- **Why it Changed:** Top-tier conferences require bulletproof evidence. By adding these specific ablation blocks, every potential reviewer counter-argument (e.g., "What if it's just the NF4 weights?" or "What if you just broke the token distribution?") is preemptively disproved with hard data.
+- **What Changed:** The final notebook architecture expanded into a multi-block pipeline (Main, Cross-Problem, Per-Layer Sweep, Transition Pinning). Blocks A–D were executed in the canonical final run; shuffled-position and retention controls remain as designed extensions.
+- **Why it Changed:** Top-tier conferences require bulletproof evidence. The executed blocks — especially the cross-problem control (+31.4 pp specificity gap) and sparse 18-layer mechanistic map — preempt the primary reviewer counter-arguments with hard causal data.
 
 ---
 
 ## Phase 5: The Final Resolution (`final/notebooke66c37d069.ipynb`)
 
-### 11. Pinning the Transition (Block D)
-- **What Changed:** The experimental sequence culminated in the `final/` folder execution where Block D (Transition Pinning) mapped layers 30, 31, 32, 33, 34, and 35. 
-- **Why it Changed:** The broad per-layer sweep (Block C) identified a wide gap between layer 28 (36% flip rate) and layer 36 (9% flip rate). To make a publishable claim about the "Functional Rift," we needed mechanistic precision. The Block D execution proved that the collapse is strictly localized between layers 31 and 35—a tight 4-layer window where the model irrevocably locks into its terminal decision.
+### 11. The Definitive Run (Blocks A–D)
+- **What Changed:** The experimental sequence culminated in the `final/` folder execution on **N=19 organic pairs** (100% temperature-sampled, zero injection fallbacks). Blocks A–D were executed: behavioral main experiment (54.5% flip rate), cross-problem control (23.1%, +31.4 pp specificity gap), sparse per-layer sweep, and transition pinning.
+- **Why it Changed:** Earlier pilots (N=20, ~57% flip rate) established the directional signal but lacked cross-problem controls and layer-level resolution. The final run tightened segmentation, expanded the ablation suite, and mapped the functional rift across a sparse 18-layer subset of the transformer stack — producing the functional rift finding (plateau → collapse at layers 30–35 → 0% lock at tested late layers).
+
+### 12. Pinning the Transition (Block D)
+- **What Changed:** Block D (Transition Pinning) mapped layers 30, 31, 33, 34, and 35 at high resolution, complementing the Block C sparse sweep and canary runs at layers 32 and 36.
+- **Why it Changed:** The broad per-layer sweep identified a wide gap between layer 28 (36.4% flip rate) and layer 36 (9.1% flip rate). Block D proved the collapse is localized in the layers 30–35 window — the model irrevocably locks into its terminal decision across a tight mechanistic boundary.
