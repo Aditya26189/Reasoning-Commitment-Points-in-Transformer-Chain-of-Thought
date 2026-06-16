@@ -20,7 +20,7 @@ This document provides a structured outline for writing the final conference pap
 
 ## 2. Related Work
 - **Activation Patching & Mechanistic Interpretability:** (Wang et al., Nanda et al.). How Truncate & Generate differs from traditional static patching on variable-length sequences.
-- **The Functional Rift:** Dutta et al. on the bipartite nature of transformer layers (early context-processing vs. late prior-projection). Our work provides layer-precise evidence on a reasoning task.
+- **The Functional Rift:** Dutta et al. (*"How to think step-by-step: A mechanistic understanding of chain-of-thought reasoning"*) on the bipartite nature of transformer layers (early context-processing vs. late prior-projection). Our work provides layer-precise evidence on a reasoning task with a distinct layer range on Qwen2.5-14B.
 - **Chain of Thought Mechanics:** How intermediate reasoning steps influence terminal distributions.
 
 ## 3. Methodology

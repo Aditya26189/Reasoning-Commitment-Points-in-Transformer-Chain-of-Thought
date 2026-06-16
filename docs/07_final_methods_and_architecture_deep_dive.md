@@ -26,6 +26,8 @@ The `collect_pairs_v3` function orchestrated the data mining:
 3.  **Phase 3 (Escalating Sampling):** Sample traces at temperatures `[1.4, 1.6, 1.8, 2.0]`. The first trace yielding a mathematically incorrect answer (that is properly formatted with `####` or `\boxed{}`) is captured as the organic $T_{wrong}$.
 4.  **Phase 4 (Injection Fallback):** If sampling fails, the code falls back to string-manipulation injection (swapping the final numbers inside the LaTeX boxing of a correct trace). *Note: The final N=19 dataset consisted entirely of organic sampled pairs, validating the sampling strategy.*
 
+**Canonical run data source:** The final notebook did not re-collect pairs from scratch. It loaded a pre-built Kaggle dataset at `/kaggle/input/datasets/aditya26189/aditya-pairs/pairs.json` (20 pairs), then filtered out 1 "fake-wrong" pair whose wrong answer still matched GT under the updated `answers_match()` rules, yielding **N=19 organic pairs**. The notebook can top up to `N_PAIRS` via `collect_pairs_v3` if the file is missing locally; the published results used only the pre-collected set.
+
 ### 2.2 Normalization Logic
 To compare final mathematical outputs robustly, a `normalize_answer` function strips LaTeX (`\boxed{}`), dollar signs, percentage signs, converts `\frac{A}{B}` to `A/B`, and removes extraneous whitespace before validating with `answers_match()`.
 
@@ -126,8 +128,8 @@ The aggregation of Blocks C and D across the 18 measured layers ($N=19$ organic 
 | **20**| 4 | 11 | **36.4%** | of the time. |
 | **24**| 5 | 11 | **45.5%** | |
 | **28**| 4 | 11 | **36.4%** | |
-| **30**| 3 | 11 | **27.3%** | **The Transition Zone:** |
-| **31**| 2 | 11 | **18.2%** | A tight 6-layer window where semantic steerability |
+| **30**| 3 | 11 | **27.3%** | **The Transition Zone (layers 30–35):** |
+| **31**| 2 | 11 | **18.2%** | A tight 6-layer collapse window where semantic steerability |
 | **32**| 3 | 11 | **27.3%** | collapses. The internal probability distribution |
 | **33**| 3 | 11 | **27.3%** | is irrevocably collapsing onto the terminal state. |
 | **34**| 2 | 11 | **18.2%** | |
