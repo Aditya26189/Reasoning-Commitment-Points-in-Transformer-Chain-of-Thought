@@ -24,10 +24,10 @@ The audit confirmed that `store_pass` grabs activations using the absolute token
 
 ## 4.2 The "Functional Rift" vs. Monotonic Decline
 
-The initial $N=12$ per-layer patching scan revealed a specific shape in the Commitment Curve:
-- **Layers 0–32**: A plateau of 25% – 42% flip rates.
-- **Layers 36–40**: A collapse zone.
-- **Layers 44–47**: A hard 0% flip rate.
+The initial per-layer patching scans, culminating in the Block D Transition Pinning sweep, revealed a highly specific shape in the Commitment Curve:
+- **Layers 0–28**: A plateau of 36% – 45% flip rates (Semantic Steering).
+- **Layers 30–35**: The transition zone, where the flip rate collapses sharply from 27% down to 9% across a tight 4-layer window.
+- **Layers 44–47**: A hard 0% flip rate (Causal Locking).
 
 ### 4.2.1 Statistical Significance at Late Layers
 A naive reading might dismiss the late-layer $0\%$ flip rate as noise due to the small $N=12$ sample. However, if the true latent flip rate were $30\%$, the probability of observing exactly zero flips across 12 trials is $0.7^{12} \approx 1.4\%$. A hard zero at these endpoints is statistically significant evidence of causal locking.

@@ -41,8 +41,9 @@ This document provides a highly structured outline for writing the final top-tie
 - **4.2 The Cross-Problem Baseline:**
   - Demonstrating that patching from a different math problem yields $~0\%$ flip rate, mathematically proving the effect is *semantic steering*, not *attention disruption*.
 - **4.3 The Mechanistic Sweep (Layer-wise Commitment):**
-  - **The Plateau:** Flips successfully triggered across layers 0–32.
-  - **The Cliff:** The hard $0\%$ flip rate at layers 44 & 47.
+  - **The Plateau (Layers 0-28):** Flips successfully triggered, demonstrating semantic steering in early/mid layers.
+  - **The Transition Zone (Layers 30-35):** The precise 4-layer window where the flip rate collapses from 27% to 9%.
+  - **The Cliff (Layers 44-47):** The hard $0\%$ flip rate.
   - **Validation:** Textual evidence that late layers are causally locked (outputting the original wrong answer) rather than disrupted (outputting nonsense).
 
 ## 5. Discussion

@@ -59,3 +59,11 @@ This narrative is explicitly designed to support the "challenges overcome" and m
 ### 10. The Ultimate Control Suite
 - **What Changed:** The final notebook expanded into a highly structured 6-block pipeline (Main, Cross-Problem, Per-Layer, NF4 check, Shuffled, Retention).
 - **Why it Changed:** Top-tier conferences require bulletproof evidence. By adding these specific ablation blocks, every potential reviewer counter-argument (e.g., "What if it's just the NF4 weights?" or "What if you just broke the token distribution?") is preemptively disproved with hard data.
+
+---
+
+## Phase 5: The Final Resolution (`final/notebooke66c37d069.ipynb`)
+
+### 11. Pinning the Transition (Block D)
+- **What Changed:** The experimental sequence culminated in the `final/` folder execution where Block D (Transition Pinning) mapped layers 30, 31, 32, 33, 34, and 35. 
+- **Why it Changed:** The broad per-layer sweep (Block C) identified a wide gap between layer 28 (36% flip rate) and layer 36 (9% flip rate). To make a publishable claim about the "Functional Rift," we needed mechanistic precision. The Block D execution proved that the collapse is strictly localized between layers 31 and 35—a tight 4-layer window where the model irrevocably locks into its terminal decision.
