@@ -13,25 +13,27 @@ The central behavioral result comes from **Block A** — patching `computation_o
 | Organic pairs collected | N = 19 (100% organically sampled, zero injection fallbacks) |
 | Eligible for analysis | n = 11 (after excluding 7 "already flipped" + 1 skipped) |
 | **Flip Rate** | **54.5%** (6/11) |
-| **95% Wilson CI** | **[28.0%, 78.7%]** |
+| **95% Clopper-Pearson CI** | **[23.4%, 83.3%]** |
 
 More than half of traces that were genuinely committed to a wrong answer at the computation boundary were **causally redirected** to the ground truth by injecting correct computational hidden states. This is not a marginal effect — it demonstrates that intermediate computation tokens carry substantial semantic momentum capable of overriding an incorrect reasoning trajectory.
 
-The pilot study (N=20, see §3.6) observed a similar directional signal at 57.1%. The final run, with tightened segmentation and a fully organic pair set, reproduced the effect at 54.5% while expanding the scope.
+The pilot study established the directional signal for `computation_only` patching (exact rate pending verification of `final/notebook_final_pilot_cummulative.ipynb`). The final run, with tightened segmentation and a fully organic pair set, reproduced the effect at 54.5% while expanding the scope.
 
 ## 3.2 Cross-Problem Specificity: Semantic Steering, Not Disturbance
 
 **Block B** patches activations from an entirely *different* math problem into the wrong trace. If flips were driven purely by attention disruption or generic activation noise, Block B should match Block A:
 
-| Block | Flip Rate | n | 95% Wilson CI |
+| Block | Flip Rate | n | 95% Clopper-Pearson CI |
 | :--- | :---: | :---: | :---: |
-| **A — Same Problem** | **54.5%** | 11 | [28.0%, 78.7%] |
-| **B — Cross-Problem** | **23.1%** | 13 | [8.2%, 50.3%] |
-| **Specificity Gap** | **+31.4 pp** | — | CIs overlap; Fisher's exact p=0.21 |
+| **A — Same Problem** | **54.5%** | 11 | [23.4%, 83.3%] |
+| **B — Cross-Problem** | **23.1%** | 13 | [5.0%, 53.8%] |
+| **Specificity Gap** | **+31.4 pp** | — | CIs overlap; McNemar's test (b=6, c=2, χ²=1.125, p≈0.29) |
 
-The 31.4 percentage-point gap **exceeds our 25 pp design threshold**. Same-problem patching is **2.4× more effective** than cross-problem patching. This is strong causal evidence that the steering effect is driven by **problem-specific semantic content** embedded in the computational hidden states, not by arbitrary residual-stream perturbation.
+The 31.4 percentage-point gap (95% CI on the difference: approximately [−9pp, +72pp] given the small eligible pair counts) is strong directional evidence, though the interval is wide at this sample size. Same-problem patching is **2.4× more effective** than cross-problem patching.
 
-The residual 23.1% in Block B is expected: cross-problem activations still share generic mathematical structure (operator patterns, numeric formatting) that can occasionally nudge generation. The critical claim is the **large, systematic gap** — not that cross-problem patching is exactly zero. *(Note: The specificity gap provides strong directional evidence, though it was estimated on slightly different eligible pair subsets due to asymmetric mask clipping in the code path. A paired analysis on the 10 strictly shared pairs yields an even wider gap of 60.0% vs 20.0%, albeit underpowered for formal statistical significance with Fisher's exact $p=0.21$).*
+**The Zero-Overlap Anomaly:** While the cross-problem control yields a lower flip rate, an analysis of the specific traces reveals a zero-overlap anomaly. The traces that successfully flipped under Block A same-problem patching (original pair indices: `{4, 5, 10, 14, 17, 18}`) and Block B cross-problem patching (`{0, 1, 13}`) form completely disjoint sets. Not a single trace flipped under both conditions. The fact that pairs 0 and 1 flipped cross-problem but failed within-problem complicates the semantic specificity claim and suggests that cross-problem activations might be introducing unique disruption dynamics rather than strictly functioning as a weakened semantic signal.
+
+The residual 23.1% in Block B indicates that cross-problem activations still share generic mathematical structure (operator patterns, numeric formatting) that can occasionally nudge generation. *(Note: The specificity gap provides strong directional evidence, though it was estimated on slightly different eligible pair subsets due to asymmetric mask clipping in the code path. A paired analysis on the 10 strictly shared pairs yields a 60.0% vs 20.0% split, albeit underpowered for formal statistical significance with continuity-corrected McNemar's test (b=6, c=2, χ²=1.125, p≈0.29)).*
 
 ## 3.3 The Functional Rift: Per-Layer Mechanistic Map
 
@@ -45,9 +47,11 @@ Blocks C (sparse sweep) and D (transition pinning) mapped flip rate across a spa
 
 ### Statistical Significance of the Late-Layer Zero
 
-If the true latent flip rate at late layers were 30%, the probability of observing exactly 0 flips across 11 trials is $0.7^{11} \approx 2.0\%$. The hard zero at layers 44 and 47 (the only late layers tested) is statistically significant evidence of **causal locking**, not sampling noise.
+If the true latent flip rate at late layers were 30%, the probability of observing exactly 0 flips across 11 trials is $0.7^{11} \approx 2.0\%$. We use 30% as a conservative assumed rate — deliberately below the observed plateau mean of 40.9% — so that the significance claim does not depend on the plateau estimate itself. The hard zero at layers 44 and 47 (the only late layers tested) is statistically significant evidence of **causal locking**, not sampling noise.
 
-The transition zone is tightly localized: flip rate drops from 36.4% at layer 28 to 9.1% at layer 35 — a **4× reduction** across just 7 layers. Block D transition pinning (layers 30, 31, 33, 34, 35) confirmed this is not a gradual monotonic decline but a **plateau followed by a cliff**, aligning with the functional rift framework (Dutta et al., *"How to think step-by-step"*).
+The transition zone is localized across layers 30–35. Rather than a rapid monotonic collapse, the data shows a generally declining trend with non-monotone variation (27.3% → 18.2% → 27.3% → 27.3% → 18.2% → 9.1%) consistent with single-pair noise at $N=11$.
+
+Crucially, **5 of the 11 committed-wrong pairs produced 0 flips across all 18 sampled layers.** This indicates that the ~41% plateau does not mean the model is uniformly ~41% steerable at every early layer; rather, it represents a fixed recoverable subpopulation (~6 pairs) contributing consistent flips. The collapse across the transition zone therefore represents these specific ~6 recoverable pairs progressively losing recoverability, not all 11 pairs uniformly committing. This plateau-to-cliff pattern aligns with the functional rift framework (Dutta et al., *"How to think step-by-step"*).
 
 See [07_final_methods_and_architecture_deep_dive.md](07_final_methods_and_architecture_deep_dive.md) for the complete per-layer table.
 
@@ -67,18 +71,18 @@ Pre-experiment audits in the final notebook confirmed:
 1. **Segmentation integrity:** All `\boxed{}` and `####` lines correctly classified as `conclusion`, never leaking into `computation_only` masks (4/4 pairs validated).
 2. **Truncate & Generate sanity check:** Baseline (unpatched) generation from truncated wrong traces reproduces the wrong answer as expected.
 3. **Organic pair purity:** 19/19 pairs from temperature sampling — no string-manipulation injection fallbacks.
+4. **Patching scope limitation:** Block A patches all 48 layers simultaneously (54.5% flip rate), while the per-layer sweep patches one layer at a time (max 45.5%). The headline rate therefore reflects the cooperative effect of the full residual stack; single-layer patching is systematically weaker and may underestimate the contribution of any individual layer in isolation.
 
 ---
 
 ## 3.6 Exploratory Pilot Context (N=20)
 
-The early cumulative sweep (preserved in `final/notebook_final_pilot_cummulative.ipynb`) established the directional signal that the final run confirmed and strengthened:
+The pilot study established the directional signal for `computation_only` patching (exact rate pending verification of `final/notebook_final_pilot_cummulative.ipynb`).
 
 | Stage | Pilot Flip Rate | Pilot n |
 | :--- | :---: | :---: |
 | `pre_setup` | 0.0% | 15 |
 | `setup` | 0.0% | 15 |
-| `computation_only` | 57.1% | 14 |
 | `+computation` | 35.3% | 17 |
 | `+transition` | 35.3% | 17 |
 
@@ -91,7 +95,7 @@ This exploratory pilot proved that the `setup` phase contributes 0% to the causa
 The final run provides strong causal evidence. Extensions that would further strengthen publication:
 
 ### Scaling Statistical Power
-Expanding from N=19 to N=40–80 organic pairs would tighten confidence intervals on the per-layer curve from ±~30% to ±~8%, enabling detection of subtle layer-to-layer gradients within the transition zone.
+Expanding from N=19 to N=40–80 organic pairs — yielding roughly n=40–80 eligible pairs per layer after exclusions — would tighten CI half-widths from approximately ±30pp to approximately ±14–20pp. Reaching ±8pp would require approximately n=140 eligible pairs per layer.
 
 ### Additional Ablation Blocks
 The experimental architecture was designed with six blocks. Blocks A–D were executed in the final run. Two designed extensions remain valuable for reviewers:

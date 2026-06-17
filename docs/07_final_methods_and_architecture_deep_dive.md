@@ -48,11 +48,6 @@ The `classify_line` function categorizes every newline-delimited string in the w
 ### 3.2 Character-to-Token Alignment
 The `get_stage_masks` algorithm solves tokenization drift. By tokenizing the `full_text` (Prompt + Trace) once, it maps raw character indices back to the precise absolute token index. This guarantees that when the code claims to patch "computation," it is patching the exact mathematical tokens, irrespective of spacing artifacts.
 
-**Final Trace Token Distribution (Averaged across N=19):**
-*   **Setup:** ~36.2%
-*   **Computation:** ~43.8%
-*   **Transition:** ~16.0%
-*   **Conclusion:** ~4.0%
 
 ---
 
@@ -73,7 +68,7 @@ The correct trace ($T_{correct}$) is run through a forward pass. Utilizing PyTor
 
 ## 5. The Experimental Blocks
 
-To provide publication-grade rigor, the final execution script orchestrates a multi-block ablation suite:
+To provide systematic, multi-block rigor, the final execution script orchestrates a multi-block ablation suite:
 
 *   **Block A (Main Experiment):** Targets the `computation_only` mask on the $N=19$ organic pairs.
 *   **Block B (Cross-Problem Control):** Repurposes the architecture to inject cached activations from an entirely *different* math problem into $T_{wrong}$. This mathematically isolates semantic steering from arbitrary attention-head disruption.
@@ -110,7 +105,7 @@ Injecting correct `computation_only` activations from the same math problem redi
 | Flips to ground truth | **3** |
 | **Flip Rate** | **23.1%** |
 
-When activations come from a *different* math problem, flip rate drops to 23.1%. The **+31.4 percentage-point specificity gap** (54.5% − 23.1%) exceeds the 25 pp design threshold and demonstrates that the steering effect is driven by problem-specific semantic content, not generic attention disruption. Same-problem patching is **2.4× more effective**.
+When activations come from a *different* math problem, flip rate drops to 23.1%. The **+31.4 percentage-point specificity gap** (54.5% − 23.1%) (95% CI on the difference: approximately [−9pp, +72pp] given the small eligible pair counts) is strong directional evidence, though the interval is wide at this sample size, and suggests that the steering effect is driven by problem-specific semantic content, not generic attention disruption. Same-problem patching is **2.4× more effective**.
 
 ---
 
@@ -130,10 +125,10 @@ The aggregation of Blocks C and D across the 18 measured layers ($N=19$ organic 
 | **28**| 4 | 11 | **36.4%** | |
 | **30**| 3 | 11 | **27.3%** | **The Transition Zone (layers 30–35):** |
 | **31**| 2 | 11 | **18.2%** | A tight 6-layer collapse window where semantic steerability |
-| **32**| 3 | 11 | **27.3%** | collapses. The internal probability distribution |
-| **33**| 3 | 11 | **27.3%** | is irrevocably collapsing onto the terminal state. |
+| **32**| 3 | 11 | **27.3%** | declines non-monotonically, showing progressive loss of recoverability |
+| **33**| 3 | 11 | **27.3%** | prior to irrevocably collapsing onto the terminal state. |
 | **34**| 2 | 11 | **18.2%** | |
-| **35**| 1 | 11 | **9.1%**  | |
+| **35**| 1 | 11 | **9.1%** | |
 | **36**| 1 | 11 | **9.1%**  | |
 | **40**| 1 | 11 | **9.1%**  | |
 | **44**| 0 | 11 | **0.0%**  | **The Cliff (Causal Locking):** |
@@ -146,10 +141,10 @@ The final run delivers two complementary layers of evidence:
 1. **Behavioral:** 54.5% same-problem flip rate with a 31.4 pp specificity gap over cross-problem controls — computation tokens are causal steering vectors with problem-specific semantic content.
 2. **Mechanistic:** A sparse 18-layer commitment map showing plateau (36–45%) → collapse (layers 30–35) → hard lock (0% at tested late layers 44 and 47).
 
-Together, these prove that Qwen2.5-14B-Instruct does not dynamically compute terminal math answers in its final layers. The model decides its answer in mid-layers (28–35), and the final layers function exclusively to project that prior into the vocabulary distribution.
+Together, these provide evidence that Qwen2.5-14B-Instruct does not dynamically compute terminal math answers in its final layers. The model decides its answer in mid-layers (28–35), and the final layers function exclusively to project that prior into the vocabulary distribution.
 
 ---
 
 ## 8. Limitations
 
-This study evaluates causal steering on **N=19 organically sampled correct/wrong trace pairs** from MATH Level 4–5, with **n=11 committed-wrong traces** entering the per-layer analysis after excluding traces that self-corrected without patching. Per-layer flip rates are estimated at **18 of 48 transformer layers** (sparse sweep with transition pinning), each with a 95% confidence interval of approximately ±30 percentage points. The cross-problem control (23.1%, n=13) and same-problem main experiment (54.5%, n=11) used **slightly different eligible pair sets** due to asymmetric mask clipping in the cross-problem code path; a paired analysis on the 10-pair intersection yields 60.0% vs 20.0% (directional gap +40 pp, but underpowered for formal significance: Fisher's exact p=0.21). Results are reported for a **single model** (Qwen2.5-14B-Instruct, NF4) with regex-based semantic segmentation. Blocks E (shuffled position) and F (correct-to-correct retention) were designed but not executed in the canonical final run.
+This study evaluates causal steering on **N=19 organically sampled correct/wrong trace pairs** from MATH Level 4–5, with **n=11 committed-wrong traces** entering the per-layer analysis after excluding traces that self-corrected without patching. Per-layer flip rates are estimated at **18 of 48 transformer layers** (sparse sweep with transition pinning), each with a 95% confidence interval of approximately ±30 percentage points. The cross-problem control (23.1%, n=13) and same-problem main experiment (54.5%, n=11) used **slightly different eligible pair sets** due to asymmetric mask clipping in the cross-problem code path. Block B has a different eligible set because cross-problem source trace clipping excludes some pairs. A paired analysis on the 10-pair intersection yields 60.0% vs 20.0% (directional gap +40 pp, but underpowered for formal significance: continuity-corrected McNemar's test (b=6, c=2, χ²=1.125, p≈0.29)). Results are reported for a **single model** (Qwen2.5-14B-Instruct, NF4) with regex-based semantic segmentation. Blocks E (shuffled position) and F (correct-to-correct retention) were designed but not executed in the canonical final run. Block A patches all 48 layers simultaneously (54.5% flip rate), while the per-layer sweep patches one layer at a time (max 45.5%). The headline rate therefore reflects the cooperative effect of the full residual stack; single-layer patching is systematically weaker and may underestimate the contribution of any individual layer in isolation.

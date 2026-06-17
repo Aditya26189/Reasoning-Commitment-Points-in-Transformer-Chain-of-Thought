@@ -35,7 +35,7 @@ To isolate the commitment point, we identify two distinct traces for the identic
 Instead of patching specific tensor dimensions inside the residual stream across the entire fixed sequence, we perform surgical, dynamically aligned intervention:
 - We truncate the target trace $T_{wrong}$ at the boundary of a specific functional stage (e.g., after the `computation` step).
 - We initiate a free-generation forward pass from that boundary to the terminal `<|im_end|>` token.
-- Crucially, during this forward pass, we use PyTorch hooks to **surgically overwrite the hidden states** of the mathematical computation tokens in the residual stream. The new states are injected directly from the cached activations of the equivalent computation step in $T_{correct}$.
+- Crucially, during this forward pass, we use PyTorch hooks to **surgically overwrite the hidden states** of the mathematical computation tokens in the residual stream. The new states are injected directly from the cached activations of the equivalent positional alignment (relative token index) in $T_{correct}$.
 
 ### The Objective Function
 The goal is to measure the **Flip Rate**: the probability that injecting correct computational hidden states causally redirects the generation of $T_{wrong}$ towards the terminal state of $T_{correct}$ (the GT answer).

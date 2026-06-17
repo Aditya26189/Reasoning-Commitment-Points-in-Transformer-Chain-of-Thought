@@ -66,7 +66,7 @@ This narrative is explicitly designed to support the "challenges overcome" and m
 
 ### 11. The Definitive Run (Blocks A–D)
 - **What Changed:** The experimental sequence culminated in the `final/` folder execution on **N=19 organic pairs** (100% temperature-sampled, zero injection fallbacks). Blocks A–D were executed: behavioral main experiment (54.5% flip rate), cross-problem control (23.1%, +31.4 pp specificity gap), sparse per-layer sweep, and transition pinning.
-- **Why it Changed:** Earlier pilots (N=20, ~57% flip rate) established the directional signal but lacked cross-problem controls and layer-level resolution. The final run tightened segmentation, expanded the ablation suite, and mapped the functional rift across a sparse 18-layer subset of the transformer stack — producing the functional rift finding (plateau → collapse at layers 30–35 → 0% lock at tested late layers).
+- **Why it Changed:** The pilot study established the directional signal for `computation_only` patching (exact rate pending verification of `final/notebook_final_pilot_cummulative.ipynb`), but lacked cross-problem controls and layer-level resolution. The final run tightened segmentation, expanded the ablation suite, and mapped the functional rift across a sparse 18-layer subset of the transformer stack — producing the functional rift finding (plateau → collapse at layers 30–35 → 0% lock at tested late layers).
 
 ### 12. Pinning the Transition (Block D)
 - **What Changed:** Block D (Transition Pinning) mapped layers 30, 31, 33, 34, and 35 at high resolution, complementing the Block C sparse sweep and canary runs at layers 32 and 36.
