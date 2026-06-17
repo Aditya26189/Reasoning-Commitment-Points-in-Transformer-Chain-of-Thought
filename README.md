@@ -2,9 +2,9 @@
   <h1>🧠 Chain-of-Thought Commitment Points</h1>
   <p><em>Mechanistic Interpretability of Latent Reasoning in Large Language Models</em></p>
   
-  [![Model](https://img.shields.io/badge/Model-Qwen2.5--14B--Instruct-blue)](https://huggingface.co/Qwen/Qwen2.5-14B-Instruct)
-  [![Dataset](https://img.shields.io/badge/Dataset-MATH_Level_4--5-green)](https://huggingface.co/datasets/DigitalLearningGmbH/MATH-lighteval)
-  [![Methodology](https://img.shields.io/badge/Method-Truncate_&_Generate-orange)]()
+  <a href="https://huggingface.co/Qwen/Qwen2.5-14B-Instruct"><img src="https://img.shields.io/badge/Model-Qwen2.5--14B--Instruct-blue" alt="Model"></a>
+  <a href="https://huggingface.co/datasets/DigitalLearningGmbH/MATH-lighteval"><img src="https://img.shields.io/badge/Dataset-MATH_Level_4--5-green" alt="Dataset"></a>
+  <img src="https://img.shields.io/badge/Method-Truncate_%26_Generate-orange" alt="Methodology">
 </div>
 
 <br/>
