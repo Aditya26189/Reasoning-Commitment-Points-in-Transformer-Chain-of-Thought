@@ -68,6 +68,6 @@ The normalization pipeline performs sequentially ordered transformations:
 
 ### Context Window Boundary Limitations
 A critical architectural parameter discovered during auditing was the interaction between `MAX_NEW_TOKENS` and the termination generation phase. 
-Initially set to `512`, the context window constraint induced truncation *during* the generation of the computation stage for complex MATH problems. 
+Initially set to `150`, the context window constraint induced truncation *during* the generation of the computation stage for complex MATH problems. 
 
 This resulted in `AssertionError: extract_gt returned None`, as the model literally ran out of compute budget before rendering the `####` delimiter. Elevating the tensor allocation to `MAX_NEW_TOKENS = 2048` provided sufficient operational headroom for the 14B parameter model to unroll its latent reasoning graphs to completion.

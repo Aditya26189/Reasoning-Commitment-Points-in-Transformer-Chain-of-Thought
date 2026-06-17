@@ -77,16 +77,9 @@ Pre-experiment audits in the final notebook confirmed:
 
 ## 3.6 Exploratory Pilot Context (N=20)
 
-The pilot study established the directional signal for `computation_only` patching (exact rate pending verification of `final/notebook_final_pilot_cummulative.ipynb`).
+The pilot study established a preliminary directional signal for `computation_only` patching (exact rate pending verification of `final/notebook_final_pilot_cummulative.ipynb`), though it suffered from methodological limitations including a `max_new_tokens=150` bug that artificially truncated early-stage generation.
 
-| Stage | Pilot Flip Rate | Pilot n |
-| :--- | :---: | :---: |
-| `pre_setup` | 0.0% | 15 |
-| `setup` | 0.0% | 15 |
-| `+computation` | 35.3% | 17 |
-| `+transition` | 35.3% | 17 |
-
-This exploratory pilot proved that the `setup` phase contributes 0% to the causal trajectory. This crucial finding justified why the rigorous final notebook (`notebooke66c37d069.ipynb`) isolated its execution specifically on the `computation_only` block. While the pilot contained minor trace-alignment noise, the final run completely resolved these and cleanly replicated the strong `computation_only` flip rate.
+More importantly, the pilot phase revealed a critical masking artifact with the `+computation` mask: because MATH dataset traces often scatter setup tokens late into the reasoning process, a cumulative `+computation` mask would occasionally push the truncation point past the final `\boxed{wrong_answer}`. This justified why the rigorous final notebook (`notebooke66c37d069.ipynb`) isolated its execution specifically on the `computation_only` block to guarantee strict segmentation integrity. While the pilot contained minor trace-alignment noise, the final run completely resolved these and cleanly replicated the strong `computation_only` flip rate.
 
 ---
 

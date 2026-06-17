@@ -15,7 +15,7 @@ This document provides a structured outline for writing the final conference pap
 - **Contributions:**
   1. **Truncate & Generate:** A robust methodology to causally intervene on autoregressive CoT traces without destroying token alignment.
   2. **Behavioral commitment locus:** Demonstration that computation-token activations carry sufficient semantic momentum to redirect >50% of committed-wrong trajectories (54.5%).
-  3. **Causal specificity:** Cross-problem control yields a 31.4 pp gap — the effect is directionally consistent with problem-specific semantic steering, not generic disturbance.
+  3. **Causal specificity:** Cross-problem control yields a 31.4 pp gap, providing directional evidence that the effect is driven by problem-specific semantic content rather than generic disturbance.
   4. **Layer-wise functional rift:** First sparse per-layer commitment map on a 48-layer model for mathematical CoT, revealing plateau → collapse → cliff architecture.
 
 ## 2. Related Work
