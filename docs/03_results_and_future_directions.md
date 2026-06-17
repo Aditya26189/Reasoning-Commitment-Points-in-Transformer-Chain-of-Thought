@@ -77,9 +77,9 @@ Pre-experiment audits in the final notebook confirmed:
 
 ## 3.6 Exploratory Pilot Context (N=20)
 
-The pilot study established a preliminary directional signal for `computation_only` patching (exact rate pending verification of `final/notebook_final_pilot_cummulative.ipynb`), though it suffered from methodological limitations including a `max_new_tokens=150` bug that artificially truncated early-stage generation.
+The pilot study established a preliminary directional signal for `computation_only` patching, though it served primarily to identify architectural limitations in cumulative segmentation.
 
-More importantly, the pilot phase revealed a critical masking artifact with the `+computation` mask: because MATH dataset traces often scatter setup tokens late into the reasoning process, a cumulative `+computation` mask would occasionally push the truncation point past the final `\boxed{wrong_answer}`. This justified why the rigorous final notebook (`notebooke66c37d069.ipynb`) isolated its execution specifically on the `computation_only` block to guarantee strict segmentation integrity. While the pilot contained minor trace-alignment noise, the final run completely resolved these and cleanly replicated the strong `computation_only` flip rate.
+The pilot phase revealed a critical masking artifact with the `+computation` mask: because MATH dataset traces often scatter setup tokens late into the reasoning process, a cumulative `+computation` mask would occasionally push the truncation point past the final `\boxed{wrong_answer}`. This justified why the rigorous final notebook (`notebooke66c37d069.ipynb`) isolated its execution specifically on the `computation_only` block to guarantee strict segmentation integrity. While the pilot contained minor trace-alignment noise, the final run completely resolved these and cleanly replicated the strong `computation_only` flip rate.
 
 ---
 
