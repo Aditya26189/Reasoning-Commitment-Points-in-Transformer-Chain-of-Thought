@@ -18,7 +18,7 @@ In the per-layer analysis (`run_per_layer`), the unpatched baseline is evaluated
 
 ### 4.1.3 Trace Alignment Symmetry
 When extracting activation tensors from the Correct Trace ($T_{correct}$) to patch into the Wrong Trace ($T_{wrong}$), the alignment must be mathematically sound.
-The audit confirmed that `store_pass` grabs activations using the absolute token index relative to the prompt: `c_p_len + w_rel`. This maps the relative position of the mathematical scaffolding in the wrong trace directly to the equivalent structural position in the correct reasoning trace.
+The audit confirmed that `store_pass` grabs activations using the absolute token index relative to the prompt: `c_p_len + w_rel`. This maps the relative position of the mathematical scaffolding in the wrong trace directly to the equivalent positional alignment (relative token position) in the correct reasoning trace. Note that this guarantees positional equivalence, not necessarily semantic equivalence, representing a limitation of the patching methodology.
 
 ---
 
@@ -27,17 +27,17 @@ The audit confirmed that `store_pass` grabs activations using the absolute token
 The per-layer patching scans (Blocks C and D), culminating in the Block D Transition Pinning sweep, revealed a highly specific shape in the Commitment Curve:
 
 - **Layers 0–28**: A plateau of 36.4% – 45.5% flip rates (Semantic Steering).
-- **Layers 30–35**: The transition zone, where the flip rate collapses from 27.3% down to 9.1%.
+- **Layers 30–35**: The transition zone, where the flip rate shows a jagged, non-monotone decline from 27.3% down to 9.1%.
 - **Layers 44, 47**: A hard 0.0% flip rate (Causal Locking at tested late layers).
 
 ### 4.2.1 Statistical Significance at Late Layers
-If the true latent flip rate at late layers were 30%, the probability of observing exactly zero flips across 11 trials is $0.7^{11} \approx 2.0\%$. The hard zero at layers 44 and 47 (the only late layers tested) is statistically significant evidence of causal locking, not sampling noise.
+If the true latent flip rate at late layers were 30%, the probability of observing exactly zero flips across 11 trials is $0.7^{11} \approx 2.0\%$. We use 30% as a conservative assumed rate — deliberately below the observed plateau mean of 40.9% — so that the significance claim does not depend on the plateau estimate itself. The hard zero at layers 44 and 47 (the only late layers tested) is statistically significant evidence of causal locking, not sampling noise.
 
 ### 4.2.2 The Dutta et al. Alignment
 We originally conceptualized this as a "monotonic decline," but the audit reframed this pattern as a **plateau followed by a cliff**. This shape maps directly onto the "functional rift" described by Dutta et al. (*"How to think step-by-step: A mechanistic understanding of chain-of-thought reasoning"*, Llama-2 7B).
 
-- **The Plateau (Early/Mid Layers):** These layers transmit and assemble input-relevant semantic information. Patching here steers the sequence ~40% of the time.
-- **The Cliff (Late Layers):** These layers operate past the functional rift. Their job is to rigidly project the in-context prior into the terminal vocabulary distribution. Patching here fails because the model has already irrevocably committed.
+- **The Plateau (Early/Mid Layers):** These layers transmit and assemble input-relevant semantic information. Patching here steers the sequence ~40% of the time. Crucially, 5 of the 11 committed-wrong pairs produced 0 flips across all sampled layers, meaning the plateau represents a fixed recoverable subpopulation (~6 pairs) contributing consistent flips, rather than uniform steerability.
+- **The Cliff (Late Layers):** These layers operate past the functional rift. Their job is to rigidly project the in-context prior into the terminal vocabulary distribution. Patching here fails because the model has already irrevocably committed. The collapse in the transition zone represents the ~6 recoverable pairs progressively losing recoverability.
 
 ### 4.2.3 Causal Locking Validation
 At layers 44 and 47, patching fails to flip any of 11 committed-wrong traces (0%). The Truncate & Generate sanity check confirmed that unpatched baselines from these traces reliably reproduce the **original wrong answer** (verified manually on a single-pair sanity check subset) — not mathematical garbage. This distinguishes **causal locking** (the model is committed to the wrong trajectory and late layers enforce it) from **disruption** (patching destroys coherence). The late-layer zero is evidence consistent with commitment, not noise.
@@ -56,7 +56,7 @@ The final Kaggle execution orchestrated a rigorous multi-block suite. Blocks A�
 
 2. **Block B: Cross-Problem Control (N=19 organic pairs)**
    - **Result:** 23.1% flip rate (3/13) when activations come from a different math problem.
-   - **Goal:** Isolate semantic steering from attention disturbance. The **+31.4 pp specificity gap** (exceeding the 25 pp design threshold) confirms problem-specific causal content drives the effect.
+   - **Goal:** Isolate semantic steering from attention disturbance. The **+31.4 pp specificity gap** (95% CI on the difference: approximately [−9pp, +72pp] given the small eligible pair counts) suggests problem-specific causal content drives the effect.
 
 3. **Canary Block**
    - **Result:** Layers 32 and 36 completed in 11.3 min — under the 60 min gate.
@@ -64,7 +64,7 @@ The final Kaggle execution orchestrated a rigorous multi-block suite. Blocks A�
 
 4. **Block C: Sparse Per-Layer Sweep (11 layers × n=11)**
    - **Result:** Mapped the broad commitment curve shape across layers [0, 4, 8, 12, 16, 20, 24, 28, 40, 44, 47].
-   - **Goal:** Map the functional rift across a sparse 18-layer subset of the transformer stack.
+   - **Goal:** Map the broad shape of the commitment curve across a sparse 11-layer subset (13 with canary).
 
 5. **Block D: Transition Pinning (layers 30, 31, 33, 34, 35)**
    - **Result:** High-resolution mapping of the collapse window. Completed in 18.4 min.

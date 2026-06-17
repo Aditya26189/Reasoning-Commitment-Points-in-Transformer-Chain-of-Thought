@@ -7,7 +7,7 @@ This document provides a structured outline for writing the final conference pap
 ## Abstract
 - **Context:** Chain-of-Thought (CoT) prompting enables LLMs to perform complex reasoning by unrolling computation across tokens. However, it is unknown at what precise stage — and at which transformer layers — an LLM *commits* to its final answer.
 - **Methodology:** We introduce "Truncate & Generate" activation patching. By segmenting reasoning traces into functional stages and causally intervening on computation-token hidden states, we map both the sequence-level and layer-level trajectory of commitment.
-- **Findings:** On Qwen2.5-14B-Instruct with MATH Level 4–5 problems, same-problem computation patching achieves a **54.5% flip rate** (6/11 committed-wrong traces), while cross-problem patching yields only **23.1%** — a **31.4 pp specificity gap** proving problem-specific semantic steering. A sparse 18-layer mechanistic map reveals a **functional rift**: a 36–45% plateau (layers 0–28), a collapse window (layers 30–35), and hard **0% causal locking** at tested late layers (44, 47).
+- **Findings:** On Qwen2.5-14B-Instruct with MATH Level 4–5 problems, same-problem computation patching achieves a **54.5% flip rate** (6/11 committed-wrong traces), while cross-problem patching yields only **23.1%** — a **31.4 pp specificity gap** suggesting problem-specific semantic steering. A sparse 18-layer mechanistic map reveals a **functional rift**: a 36–45% plateau (layers 0–28), a collapse window (layers 30–35), and hard **0% causal locking** at tested late layers (44, 47).
 
 ## 1. Introduction
 - The hypothesis of Latent Reasoning: Intermediate tokens act as functional hidden state carriers.
@@ -15,7 +15,7 @@ This document provides a structured outline for writing the final conference pap
 - **Contributions:**
   1. **Truncate & Generate:** A robust methodology to causally intervene on autoregressive CoT traces without destroying token alignment.
   2. **Behavioral commitment locus:** Demonstration that computation-token activations carry sufficient semantic momentum to redirect >50% of committed-wrong trajectories (54.5%).
-  3. **Causal specificity:** Cross-problem control proves a 31.4 pp gap — the effect is problem-specific semantic steering, not generic disturbance.
+  3. **Causal specificity:** Cross-problem control yields a 31.4 pp gap — the effect is directionally consistent with problem-specific semantic steering, not generic disturbance.
   4. **Layer-wise functional rift:** First sparse per-layer commitment map on a 48-layer model for mathematical CoT, revealing plateau → collapse → cliff architecture.
 
 ## 2. Related Work
@@ -41,18 +41,18 @@ This document provides a structured outline for writing the final conference pap
   - More than half of genuinely committed-wrong traces are causally redirected by correct computational activations.
 - **4.2 Cross-Problem Specificity:**
   - Block B: **23.1%** (3/13) — substantially lower than Block A.
-  - The **31.4 pp gap** (2.4× effect ratio) proves the steering is driven by problem-specific semantic content, not attention disruption (supported by a paired 10-pair intersection analysis yielding a +40 pp gap).
+  - The **31.4 pp gap** (2.4× effect ratio) suggests the steering is driven by problem-specific semantic content. However, this is complicated by a **zero-overlap anomaly**: the set of traces successfully steered in Block A and Block B are completely disjoint, indicating that cross-problem activations may introduce unique disruption dynamics.
 - **4.3 The Functional Rift (Layer-wise Commitment):**
-  - **Plateau (Layers 0–28):** 36.4% – 45.5% flip rates. Early/mid layers are an open semantic scratchpad.
-  - **Transition Zone (Layers 30–35):** Collapse from 27.3% to 9.1%. Commitment solidifies across a tight 7-layer window.
-  - **Cliff (Layers 44, 47):** Hard 0.0% (0/11). Statistically significant ($p \approx 0.02$ if true rate were 30%). Tested late layers are causally locked.
+  - **Plateau (Layers 0–28):** 36.4% – 45.5% flip rates. Early/mid layers act as an open semantic scratchpad. Note that 5 of 11 pairs never flip at any layer, meaning this plateau reflects a fixed subpopulation of ~6 recoverable pairs rather than uniform steerability.
+  - **Transition Zone (Layers 30–35):** The flip rate declines from 27.3% to 9.1%. This represents the ~6 recoverable pairs progressively losing recoverability. The decline is jagged and non-monotone (e.g. 27.3% -> 18.2% -> 27.3%), consistent with single-pair noise at N=11.
+  - **Cliff (Layers 44, 47):** Hard 0.0% (0/11). Statistically significant ($p \approx 0.02$ if true rate were 30%). We use 30% as a conservative assumed rate — deliberately below the observed plateau mean of 40.9% — so that the significance claim does not depend on the plateau estimate itself. Tested late layers are causally locked.
   - **Validation:** Unpatched baselines reproduce the original wrong answer (verified via single-pair sanity check) — consistent with locking, not disruption.
 - **4.4 Unified Model:** The model decides its answer in mid-layers (28–35); final layers project that prior into vocabulary.
 
 ## 5. Discussion
 - **5.1 The Anatomy of a Mathematical Decision:** Synthesizing behavioral (54.5% steering) and mechanistic (functional rift) findings into a unified theory.
 - **5.2 Implications:** Inference-time intervention windows for reasoning models; which layers to target for activation steering.
-- **5.3 Limitations:** N=19 organic pairs (n=11 per analysis after exclusions); single model family; regex-based segmentation boundaries; slightly asymmetric pair sets in cross-problem control.
+- **5.3 Limitations:** N=19 organic pairs (n=11 per analysis after exclusions); single model family; regex-based segmentation boundaries; slightly asymmetric pair sets in cross-problem control. Block A uses full-stack patching (54.5%); per-layer patching peaks at 45.5% — the headline rate reflects the cooperative residual-stack effect.
 
 ## 6. Conclusion
 - Summary: Computation tokens are causal steering vectors. Commitment solidifies at layers 28–35. Late layers are locked projectors.
